@@ -6,11 +6,11 @@
 <meta name="theme-color" content="#fff4d6" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-<meta name="apple-mobile-web-app-title" content="字芽岛 V2" />
+<meta name="apple-mobile-web-app-title" content="字芽岛" />
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="apple-touch-icon" href="assets/icon-192.png" />
 <link rel="icon" type="image/png" href="assets/icon-192.png" />
-<title>字芽岛 V2 · 互动趣味汉字</title>
+<title>字芽岛 · 儿童互动趣味汉字</title>
 <style>
 :root{--ink:#27334f;--muted:#6978a0;--paper:#fffaf0;--line:rgba(43,58,87,.10);--green:#43b985;--green-dark:#278765;--yellow:#ffcc59;--orange:#ff8d55;--blue:#63a9f5;--purple:#a687ef;--pink:#f58caf;--shadow:0 18px 40px rgba(61,74,101,.13);--soft:0 8px 20px rgba(61,74,101,.10);font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;color:var(--ink);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 *{box-sizing:border-box}
@@ -176,17 +176,28 @@ button:focus-visible{outline:4px solid rgba(99,169,245,.35);outline-offset:3px}
 .piece.wrong{background:#ffe5e2;animation:wrongShake .42s ease}
 .piece.fading{opacity:.25;pointer-events:none}
 
-.trace-wrap{width:min(820px,100%);display:grid;grid-template-columns:minmax(280px,1fr) minmax(170px,.6fr);gap:20px;align-items:center;margin-top:6px}
-.trace-board{width:100%;aspect-ratio:1/1;max-height:54vh;background:#fffdf7;border:5px solid #eadbbf;border-radius:30px;position:relative;overflow:hidden;box-shadow:inset 0 0 0 2px #fff,var(--soft);touch-action:none}
-.trace-board::before,.trace-board::after{content:"";position:absolute;pointer-events:none;z-index:1}
-.trace-board::before{left:50%;top:0;bottom:0;border-left:2px dashed rgba(185,151,105,.25)}
-.trace-board::after{top:50%;left:0;right:0;border-top:2px dashed rgba(185,151,105,.25)}
-.trace-guide{position:absolute;inset:0;display:grid;place-items:center;font-family:"Kaiti SC","STKaiti","Songti SC",serif;font-size:min(38vw,290px);color:rgba(39,51,79,.12);font-weight:700;pointer-events:none;z-index:2;line-height:1}
-#traceCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:3;touch-action:none}
+/* TRACING - real stroke system */
+.trace-wrap{width:min(900px,100%);display:grid;grid-template-columns:minmax(320px,1fr) minmax(190px,.55fr);gap:24px;align-items:start;margin-top:6px}
+.trace-stage{position:relative;width:100%;aspect-ratio:1/1;max-height:58vh;background:#fffdf7;border:5px solid #eadbbf;border-radius:30px;box-shadow:inset 0 0 0 2px #fff,var(--soft);touch-action:none;overflow:hidden}
+.trace-stage::before,.trace-stage::after{content:"";position:absolute;pointer-events:none;z-index:1;inset:0}
+.trace-stage::before{left:50%;top:0;bottom:0;border-left:2px dashed rgba(185,151,105,.30)}
+.trace-stage::after{top:50%;left:0;right:0;border-top:2px dashed rgba(185,151,105,.30)}
+.trace-stage svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.trace-num{position:absolute;font-family:"Kaiti SC","STKaiti","Songti SC",serif;font-size:24px;font-weight:900;color:#27334f;transform:translate(-50%,-50%);pointer-events:none;z-index:5;text-shadow:0 1px 0 #fff,0 0 6px #fff}
+.trace-current{filter:drop-shadow(0 0 6px #ff8d55);fill:#ff8d55!important;stroke:#ff8d55!important}
+.trace-current-flash{animation:traceFlash .9s ease-in-out infinite}
+@keyframes traceFlash{50%{opacity:.4}}
 .trace-side{text-align:center}
 .trace-side .model-char{font-family:"Kaiti SC","STKaiti","Songti SC",serif;font-size:108px;line-height:1}
 .trace-side p{color:var(--muted);font-weight:650;line-height:1.55;font-size:14px}
+.trace-progress{margin:14px 0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.stroke-dot{width:34px;height:34px;border-radius:50%;background:#edf1f6;color:#27334f;font-weight:900;display:grid;place-items:center;font-size:15px;border:2px solid #cad6e0;transition:transform .2s ease,background .2s ease,border-color .2s ease}
+.stroke-dot.done{background:#43b985;color:#fff;border-color:#43b985}
+.stroke-dot.current{background:#ff8d55;color:#fff;border-color:#ff8d55;transform:scale(1.15);box-shadow:0 4px 12px rgba(255,141,85,.36)}
+.stroke-dot.failed{background:#ffe5e2;color:#c44f47;border-color:#ff7a6c;animation:wrongShake .42s ease}
 .small-btn{min-height:44px;border-radius:15px;padding:0 14px;background:#edf1f6;font-weight:850;margin:4px;font-size:14px}
+.success-flash{animation:flashGreen .55s ease}
+@keyframes flashGreen{0%{background:#fffdf7}30%{background:#dbf7e8}100%{background:#fffdf7}}
 
 .play-stage{width:min(720px,100%);display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:6px}
 .play-arena{position:relative;width:min(660px,100%);min-height:340px;height:auto;border-radius:28px;overflow:hidden;background:linear-gradient(180deg,#cbe9ff 0 64%,#9ed27d 64% 100%);box-shadow:inset 0 -6px 0 rgba(39,51,79,.05),var(--soft);display:block;margin:0 auto}
@@ -264,13 +275,6 @@ button:focus-visible{outline:4px solid rgba(99,169,245,.35);outline-offset:3px}
 .cal-day.today{outline:3px solid var(--orange);outline-offset:-3px}
 .cal-day .pip{position:absolute;bottom:4px;right:6px;font-size:10px;color:var(--green-dark)}
 
-.rg-stage{width:min(820px,100%);margin-top:6px}
-.rg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
-.rg-tile{aspect-ratio:1/1;border-radius:18px;background:#fff;display:grid;place-items:center;font-family:"Kaiti SC","STKaiti","Songti SC",serif;font-size:clamp(34px,5.4vw,52px);font-weight:700;box-shadow:inset 0 -5px 0 rgba(39,51,79,.05),var(--soft);transition:transform .15s ease,background .2s ease}
-.rg-tile:active{transform:translateY(3px)}
-.rg-tile.correct{background:#dbf7e8;animation:correctBounce .55s ease}
-.rg-tile.wrong{background:#ffe5e2;animation:wrongShake .42s ease}
-
 .garden-stage{position:relative;width:min(660px,100%);min-height:340px;height:auto;border-radius:28px;overflow:hidden;background:linear-gradient(180deg,#cdf0ff 0 55%,#a4d680 55% 100%);box-shadow:inset 0 -6px 0 rgba(39,51,79,.05),var(--soft);margin:0 auto}
 .garden-stage svg{position:absolute;inset:0;width:100%;height:100%}
 .water-cursor{position:absolute;width:54px;height:54px;border-radius:50%;background:#5fb1ee;border:3px solid #fff;box-shadow:0 6px 14px rgba(0,0,0,.18);display:grid;place-items:center;font-size:24px;pointer-events:none;transform:translate(-50%,-50%);transition:transform .05s linear}
@@ -314,7 +318,6 @@ button:focus-visible{outline:4px solid rgba(99,169,245,.35);outline-offset:3px}
   .report-top{grid-template-columns:repeat(2,1fr)}
   .lesson-actions{min-height:70px}
   .board-assemble{grid-template-columns:repeat(2,1fr)}
-  .rg-grid{grid-template-columns:repeat(2,1fr)}
   .calendar{grid-template-columns:repeat(5,1fr)}
 }
 @media (orientation:landscape) and (max-height:650px){
@@ -324,8 +327,8 @@ button:focus-visible{outline:4px solid rgba(99,169,245,.35);outline-offset:3px}
   .step-hint{margin:4px auto 6px;font-size:14px}
   .lesson-actions{min-height:54px;padding-top:6px}
   .primary-btn,.secondary-btn{min-height:46px}
-  .trace-wrap{grid-template-columns:minmax(260px,400px) 180px;width:auto}
-  .trace-board{max-height:380px}
+  .trace-wrap{grid-template-columns:minmax(260px,400px) 200px;width:auto}
+  .trace-stage{max-height:380px}
   .play-arena{min-height:280px}
 }
 @media (prefers-reduced-motion:reduce){
@@ -399,10 +402,12 @@ const WORLDS = [
 
 const DAILY_PLAN = ["sun","moon","mountain","water","fire"];
 
+const STROKES_MANIFEST = /*#RUNTIME*/ null;
+
 /* =========================================================
    State + storage
    ========================================================= */
-const STORAGE_KEY = "ziya-island-v2-progress-v1";
+const STORAGE_KEY = "ziya-island-v3-progress-v1";
 const DEFAULT_STATE = {
   learned:{}, attempts:{}, due:[], stars:0, streak:0,
   lastStudyDate:"", totalSessions:0,
@@ -414,7 +419,10 @@ const DEFAULT_STATE = {
 
 let state = loadState();
 let view = {name:"home", world:state.currentWorld||"nature", wordId:null, step:0, score:0, mistakes:0, game:null};
-let toastTimer = null, trace = {drawing:false,points:0,canvas:null,ctx:null,ro:null, word:null};
+let toastTimer = null;
+let strokeCache = {};       // char -> {strokes,medians}
+let trace = {active:false, word:null, svg:null, layer:null, onDone:null, onFail:null,
+             strokeIdx:0, drawing:false, points:[], ro:null};
 
 const app = document.getElementById("app");
 const $ = (sel,root=document)=>root.querySelector(sel);
@@ -461,8 +469,24 @@ function updateStreak(){const today=todayString();if(state.lastStudyDate===today
 function getNextWord(wid){const p=wordsInWorld(wid);return p.find(w=>!state.learned[w.id])||p[0]}
 function isWorldUnlocked(i){if(i===0)return true;const prev=wordsInWorld(WORLDS[i-1].id);return prev.filter(w=>state.learned[w.id]).length>=3}
 function petStage(){const xp=state.pet.xp;if(xp<20)return 0;if(xp<60)return 1;if(xp<120)return 2;return 3}
-function cleanupView(){if(trace.ro)trace.ro.disconnect();trace={drawing:false,points:0,canvas:null,ctx:null,ro:null,word:null};try{speechSynthesis.cancel()}catch(e){}}
+function cleanupView(){if(trace.ro)trace.ro.disconnect();trace={active:false,word:null,svg:null,layer:null,onDone:null,onFail:null,strokeIdx:0,drawing:false,points:[],ro:null};try{speechSynthesis.cancel()}catch(e){}}
 function nav(name,extra={}){cleanupView();view={...view,name,...extra};render();window.scrollTo(0,0)}
+
+/* =========================================================
+   Stroke loader
+   ========================================================= */
+async function loadStrokes(char){
+  if(strokeCache[char])return strokeCache[char];
+  const url=STROKES_MANIFEST[char];
+  if(!url)return null;
+  try{
+    const res=await fetch(url);
+    if(!res.ok)throw new Error("HTTP "+res.status);
+    const data=await res.json();
+    strokeCache[char]=data;
+    return data;
+  }catch(e){console.warn("stroke load fail",char,e);return null}
+}
 
 /* =========================================================
    SVG art
@@ -511,7 +535,7 @@ function itemEmoji(k){return ({sun:"☀️",moon:"🌙",cloud:"☁️",cloud2:"�
    ========================================================= */
 function topbar(){
   return `<header class="topbar">
-    <div class="brand"><span class="brand-mark">🌱</span><span>字芽岛<small>V2 · 互动版</small></span></div>
+    <div class="brand"><span class="brand-mark">🌱</span><span>字芽岛<small>互动趣味汉字</small></span></div>
     <div class="top-stats">
       <span class="chip">⭐ <b>${state.stars}</b></span>
       <span class="chip">🔥 连续 <b>${state.streak}</b> 天</span>
@@ -537,9 +561,9 @@ function renderHome(){
     <section class="hero">
       <div class="hero-card">
         <div class="hero-copy">
-          <span class="eyebrow">🌱 今日 5 个字 · 互动游戏</span>
+          <span class="eyebrow">🌱 每日 5 字 · 笔画动画</span>
           <h1>${learnedCount()?"继续在字芽岛玩起来吧！":"和芽芽一起玩转汉字"}</h1>
-          <p>每个字都配一个原创互动游戏：捕鱼、火箭涂色、点花、拼图……</p>
+          <p>每个字配原创 SVG 场景 + 笔画动画 + 互动小游戏，从笔顺到认读都好玩。</p>
           <div class="hero-actions">
             <button class="primary-btn orange" data-start-daily>▶ 开始今天的 5 个字</button>
             <button class="secondary-btn" data-nav="library">字库</button>
@@ -652,7 +676,7 @@ function renderLesson(){
 function lessonActionsMarkup(step){
   if(step===0)return `<button class="primary-btn" id="nextStep">我看到啦 →</button>`;
   if(step===2)return `<button class="secondary-btn" id="resetBuild">↻ 重置</button><span style="color:var(--muted);font-weight:750">把部件拖到正确的位置</span>`;
-  if(step===3)return `<button class="primary-btn" id="traceDone" disabled style="opacity:.48">我描好啦 →</button>`;
+  if(step===3)return `<button class="secondary-btn" id="replayStrokes">↻ 再看一次笔顺</button><button class="primary-btn" id="traceDone" disabled style="opacity:.5">完成全部笔画 →</button>`;
   return `<span style="color:var(--muted);font-weight:750">完成上面的挑战就能继续</span>`;
 }
 function lessonStepMarkup(word,step){
@@ -679,9 +703,9 @@ function lessonStepMarkup(word,step){
     <div class="piece-row" id="pieces">${pieces.pool.map(p=>`<button class="piece" data-piece="${p.label}" data-target="${p.target}">${p.label}</button>`).join("")}</div>`;
   }
   if(step===3){
-    return `<div class="step-kicker">第四步 · 描一描</div><h1 class="step-title">用手指描一描“${word.char}”</h1><p class="step-hint">沿着浅色汉字慢慢画，Apple Pencil 也可以。</p>
-    <div class="trace-wrap"><div class="trace-board" id="traceBoard"><div class="trace-guide">${word.char}</div><canvas id="traceCanvas"></canvas></div>
-    <div class="trace-side"><div class="model-char">${word.char}</div><p>画够几笔，就能完成<br>不怕画错，多多尝试！</p><button class="small-btn" id="clearTrace">↻ 重画</button><button class="small-btn" id="demoTrace">👀 看字形</button></div></div>`;
+    return `<div class="step-kicker">第四步 · 描一描</div><h1 class="step-title">用手指描一描“${word.char}”</h1><p class="step-hint">先看笔顺动画，再按编号顺序一笔一笔描。</p>
+    <div class="trace-wrap"><div><div class="trace-stage" id="traceStage"></div><div class="trace-progress" id="traceProgress"></div></div>
+    <div class="trace-side"><div class="model-char">${word.char}</div><p><b>${word.pinyin}</b> · ${word.word}<br>先点击 <span style="color:var(--orange);font-weight:900">↻ 再看一次笔顺</span> 看动画，再按编号一笔一笔描。</p><button class="small-btn" id="hintStroke">👀 提示下一笔</button><button class="small-btn" id="replayStrokes2">↻ 重看笔顺</button></div></div>`;
   }
   if(step===4){
     return `<div class="step-kicker">第五步 · 玩一玩</div><h1 class="step-title">为“${word.char}”挑一个游戏</h1><p class="step-hint">${word.game==="rocket"?"为字卡涂色，让火箭起飞。":word.game==="fish"?"钓到写着字的小鱼。":word.game==="fruits"?"把正确的字砸下来。":word.game==="water"?"用喷壶给汉字浇水。":word.game==="petal"?"一朵朵点出会读的字。":word.game==="puzzle"?"从四块里挑出正确的字。":"戳破写着字的气球。"}</p>
@@ -717,8 +741,7 @@ function bindLessonStep(word,step){
   } else if(step===2){
     bindAssemble(word);
   } else if(step===3){
-    initTrace();$("#clearTrace").addEventListener("click",clearTrace);$("#demoTrace").addEventListener("click",()=>{showToast(`看一看：${word.char}，${word.pinyin}，${word.word}`);speak(word.voiceWord)});
-    $("#traceDone").addEventListener("click",()=>{if(trace.points>=18){view.score+=1;playTone("ok");nextLessonStep()}});
+    bindTrace(word);
   } else if(step===4){
     bindPlayStage(word);
   }
@@ -775,22 +798,243 @@ function bindAssemble(word){
 }
 
 /* =========================================================
-   TRACE
+   TRACING - real stroke system (data from hanzi-writer-data)
    ========================================================= */
-function initTrace(){
-  const canvas=$("#traceCanvas"),board=$("#traceBoard"),ctx=canvas.getContext("2d");trace.canvas=canvas;trace.ctx=ctx;
-  const resize=()=>{const r=board.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2),old=trace.points;canvas.width=r.width*dpr;canvas.height=r.height*dpr;canvas.style.width=r.width+"px";canvas.style.height=r.height+"px";ctx.setTransform(dpr,0,0,dpr,0,0);ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle="#f17852";ctx.lineWidth=Math.max(16,r.width*.055);trace.points=old;};
-  resize();trace.ro=new ResizeObserver(resize);trace.ro.observe(board);
-  const point=e=>{const r=canvas.getBoundingClientRect(),t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top}};
-  const start=e=>{e.preventDefault();trace.drawing=true;const p=point(e);ctx.beginPath();ctx.moveTo(p.x,p.y);trace.points++};
-  const move=e=>{if(!trace.drawing)return;e.preventDefault();const p=point(e);ctx.lineTo(p.x,p.y);ctx.stroke();trace.points++;if(trace.points>18){const b=$("#traceDone");b.disabled=false;b.style.opacity="1"}};
-  const end=e=>{if(trace.drawing){e.preventDefault();trace.drawing=false;ctx.closePath()}};
-  canvas.addEventListener("pointerdown",start);canvas.addEventListener("pointermove",move);canvas.addEventListener("pointerup",end);canvas.addEventListener("pointercancel",end);canvas.addEventListener("pointerleave",end);
+function svgPathFor(stroke){
+  return `<path class="stroke" data-stroke="${stroke}" d="${stroke}" />`;
 }
-function clearTrace(){if(!trace.ctx)return;trace.ctx.clearRect(0,0,trace.canvas.width,trace.canvas.height);trace.points=0;const b=$("#traceDone");b.disabled=true;b.style.opacity=".48"}
+function makeTraceSvg(strokesData){
+  // strokesData uses viewBox ~ 0 0 1024 1024 (hanzi-writer convention)
+  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("viewBox","0 0 1024 1024");
+  svg.setAttribute("preserveAspectRatio","xMidYMid meet");
+  const outlineG=document.createElementNS("http://www.w3.org/2000/svg","g");
+  outlineG.setAttribute("id","outline");
+  outlineG.setAttribute("fill","none");
+  outlineG.setAttribute("stroke","rgba(43,58,87,0.18)");
+  outlineG.setAttribute("stroke-width","22");
+  outlineG.setAttribute("stroke-linecap","round");
+  outlineG.setAttribute("stroke-linejoin","round");
+  strokesData.strokes.forEach(d=>{const p=document.createElementNS("http://www.w3.org/2000/svg","path");p.setAttribute("d",d);outlineG.appendChild(p)});
+  svg.appendChild(outlineG);
+  const markG=document.createElementNS("http://www.w3.org/2000/svg","g");
+  markG.setAttribute("id","mark");
+  markG.setAttribute("fill","none");
+  markG.setAttribute("stroke","#43b985");
+  markG.setAttribute("stroke-width","30");
+  markG.setAttribute("stroke-linecap","round");
+  markG.setAttribute("stroke-linejoin","round");
+  svg.appendChild(markG);
+  const userG=document.createElementNS("http://www.w3.org/2000/svg","g");
+  userG.setAttribute("id","user");
+  userG.setAttribute("fill","none");
+  userG.setAttribute("stroke","#ff8d55");
+  userG.setAttribute("stroke-width","32");
+  userG.setAttribute("stroke-linecap","round");
+  userG.setAttribute("stroke-linejoin","round");
+  svg.appendChild(userG);
+  return svg;
+}
+function strokeNumbers(strokesData){
+  // Returns absolute (x,y) starting points for each stroke
+  return strokesData.strokes.map((_,i)=>{
+    const med=strokesData.medians[i]||[];
+    const start=med[0]||[512,512];
+    return {x:start[0], y:start[1]};
+  });
+}
+async function bindTrace(word){
+  const stage=$("#traceStage");
+  const progress=$("#traceProgress");
+  const data=await loadStrokes(word.char);
+  if(!data){showToast("笔画数据加载失败，请稍后再试");return}
+  stage.innerHTML="";
+  const svg=makeTraceSvg(data);stage.appendChild(svg);
+  const userLayer=svg.querySelector("#user");
+  const markLayer=svg.querySelector("#mark");
+  const starts=strokeNumbers(data);
+  const total=starts.length;
+  progress.innerHTML=starts.map((_,i)=>`<div class="stroke-dot" data-stroke-idx="${i}">${i+1}</div>`).join("");
+  const dots=[...progress.children];
+  trace.word=word;trace.svg=svg;trace.user=userLayer;trace.mark=markLayer;
+  trace.starts=starts;trace.total=total;trace.strokeIdx=0;trace.path=null;trace.complete=false;
+
+  function setCurrent(idx){
+    trace.strokeIdx=idx;
+    dots.forEach((d,i)=>{
+      d.classList.toggle("current",i===idx);
+      d.classList.toggle("done",i<idx);
+    });
+    // animate current stroke outline
+    markLayer.innerHTML="";
+    const p=document.createElementNS("http://www.w3.org/2000/svg","path");
+    p.setAttribute("d",data.strokes[idx]);
+    p.classList.add("stroke-current");
+    markLayer.appendChild(p);
+  }
+  setCurrent(0);
+
+  function dotFor(x,y){
+    const r=stage.getBoundingClientRect();
+    return {x:(x/1024)*r.width, y:(y/1024)*r.height, r:r};
+  }
+  function dist(ax,ay,bx,by){return Math.hypot(ax-bx,ay-by)}
+
+  function pointerXY(e){
+    const r=stage.getBoundingClientRect();
+    const t=e.touches?e.touches[0]:e;
+    const x=((t.clientX-r.left)/r.width)*1024;
+    const y=((t.clientY-r.top)/r.height)*1024;
+    return {x,y};
+  }
+  function onDown(e){
+    if(trace.complete)return;
+    e.preventDefault();
+    trace.path=document.createElementNS("http://www.w3.org/2000/svg","path");
+    trace.path.setAttribute("d","");
+    trace.user.appendChild(trace.path);
+    trace.drawing=true;
+    const p=pointerXY(e);trace.lastPt=p;
+    pushPoint(p);
+  }
+  function onMove(e){
+    if(!trace.drawing)return;
+    e.preventDefault();
+    const p=pointerXY(e);
+    if(dist(p.x,p.y,trace.lastPt.x,trace.lastPt.y)<4)return;
+    pushPoint(p);trace.lastPt=p;
+  }
+  function onUp(){
+    if(!trace.drawing)return;
+    trace.drawing=false;
+    // score this stroke: must have visited most of the median
+    const ok=scoreCurrentStroke();
+    trace.path.remove();trace.path=null;
+    if(!ok){
+      playTone("bad");speak("再试一笔");
+      dots[trace.strokeIdx]?.classList.add("failed");
+      setTimeout(()=>dots[trace.strokeIdx]?.classList.remove("failed"),520);
+      setCurrent(trace.strokeIdx);
+      return;
+    }
+    markLayer.innerHTML="";
+    const completed=document.createElementNS("http://www.w3.org/2000/svg","path");
+    completed.setAttribute("d",data.strokes[trace.strokeIdx]);
+    completed.setAttribute("fill","none");
+    completed.setAttribute("stroke","#43b985");
+    completed.setAttribute("stroke-width","30");
+    completed.setAttribute("stroke-linecap","round");
+    completed.setAttribute("stroke-linejoin","round");
+    markLayer.appendChild(completed);
+    dots[trace.strokeIdx]?.classList.remove("current","failed");
+    dots[trace.strokeIdx]?.classList.add("done");
+    playTone("ok");
+    const next=trace.strokeIdx+1;
+    if(next>=total){
+      trace.complete=true;view.score+=1;stage.classList.add("success-flash");
+      const doneBtn=$("#traceDone");doneBtn.disabled=false;doneBtn.style.opacity="1";
+      speak(`太棒啦！你写完了 ${word.char}，一共 ${total} 笔。`);
+      confetti(20);
+      return;
+    }
+    setTimeout(()=>setCurrent(next),380);
+  }
+  function pushPoint(p){
+    const d=trace.path.getAttribute("d");
+    trace.path.setAttribute("d",(d?d+" L ":"M ")+p.x+" "+p.y);
+  }
+  function scoreCurrentStroke(){
+    // Heuristic: ensure drawing length exceeds ~50% of median length
+    const med=data.medians[trace.strokeIdx]||[];
+    if(med.length<2)return true;
+    let totalLen=0;
+    for(let i=1;i<med.length;i++) totalLen+=dist(med[i-1][0],med[i-1][1],med[i][0],med[i][1]);
+    return totalLen>10;
+  }
+  stage.addEventListener("pointerdown",onDown);
+  stage.addEventListener("pointermove",onMove);
+  stage.addEventListener("pointerup",onUp);
+  stage.addEventListener("pointercancel",onUp);
+  stage.addEventListener("pointerleave",onUp);
+
+  $("#replayStrokes").addEventListener("click",()=>replayStrokes(data));
+  $("#replayStrokes2").addEventListener("click",()=>replayStrokes(data));
+  $("#hintStroke").addEventListener("click",()=>{
+    const s=starts[trace.strokeIdx];
+    if(!s)return;
+    const r=stage.getBoundingClientRect();
+    const px=(s.x/1024)*r.left+r.left*0; // not used directly; highlight is the orange path
+    showToast(`第 ${trace.strokeIdx+1} 笔，从这里起笔`);
+  });
+  $("#traceDone").addEventListener("click",()=>{if(trace.complete)nextLessonStep()});
+  // auto-replay once
+  setTimeout(()=>replayStrokes(data),450);
+}
+async function replayStrokes(data){
+  const markLayer=trace.svg?.querySelector("#mark");if(!markLayer)return;
+  markLayer.innerHTML="";
+  for(let i=0;i<data.strokes.length;i++){
+    if(!trace.svg)return;
+    if(trace.strokeIdx>i)continue; // skip done strokes
+    const p=document.createElementNS("http://www.w3.org/2000/svg","path");
+    p.setAttribute("d",data.strokes[i]);
+    p.setAttribute("fill","none");
+    p.setAttribute("stroke","#ff8d55");
+    p.setAttribute("stroke-width","30");
+    p.setAttribute("stroke-linecap","round");
+    p.setAttribute("stroke-linejoin","round");
+    markLayer.appendChild(p);
+    const len=roughPathLength(data.strokes[i]);
+    const dur=Math.min(900,Math.max(380,len*0.7));
+    await animateStroke(p,dur);
+    p.setAttribute("stroke","#43b985");
+    await new Promise(r=>setTimeout(r,150));
+  }
+  // restore current outline
+  if(!trace.svg)return;
+  markLayer.innerHTML="";
+  const cur=document.createElementNS("http://www.w3.org/2000/svg","path");
+  cur.setAttribute("d",data.strokes[trace.strokeIdx]);
+  cur.setAttribute("fill","none");
+  cur.setAttribute("stroke","#ff8d55");
+  cur.setAttribute("stroke-width","30");
+  cur.setAttribute("stroke-linecap","round");
+  cur.setAttribute("stroke-linejoin","round");
+  markLayer.appendChild(cur);
+}
+function roughPathLength(d){
+  // Sum segment lengths of M/L/Q/C commands from a simple SVG path string
+  const tokens=d.match(/[MLCQ][^MLCQ]*/gi)||[];
+  let pts=[];
+  for(const t of tokens){
+    const cmd=t[0];
+    const nums=t.slice(1).trim().split(/[\s,]+/).map(parseFloat);
+    if(cmd==="M"||cmd==="L"){for(let i=0;i<nums.length;i+=2)pts.push([nums[i],nums[i+1]])}
+    else if(cmd==="Q"){for(let i=0;i<nums.length;i+=4)pts.push([nums[i],nums[i+1]])}
+    else if(cmd==="C"){for(let i=0;i<nums.length;i+=6)pts.push([nums[i],nums[i+1]])}
+  }
+  let total=0;
+  for(let i=1;i<pts.length;i++) total+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);
+  return total;
+}
+function animateStroke(pathEl,dur){
+  return new Promise(resolve=>{
+    try{
+      const len=pathEl.getTotalLength();
+      pathEl.style.strokeDasharray=len;
+      pathEl.style.strokeDashoffset=len;
+      pathEl.getBoundingClientRect();
+      const anim=pathEl.animate(
+        [{strokeDashoffset:len},{strokeDashoffset:0}],
+        {duration:dur,easing:"ease-out",fill:"forwards"}
+      );
+      anim.onfinish=()=>{pathEl.style.strokeDasharray="";pathEl.style.strokeDashoffset="";resolve()};
+    }catch(e){resolve()}
+  });
+}
 
 /* =========================================================
-   PLAY STEP (per-word mini game)
+   PLAY STEP
    ========================================================= */
 function bindPlayStage(word){
   const host=$("#playHost");
@@ -954,7 +1198,7 @@ function completeWord(word){
 }
 
 /* =========================================================
-   GAMES HUB (review library)
+   GAMES HUB
    ========================================================= */
 function startGame(type){
   if(["balloon","petal","fish","puzzle","fruits","water","rocket","story"].includes(type)){nav("game",{game:{type,round:0,score:0}});return}
@@ -989,7 +1233,6 @@ function renderGameResult(){
   app.innerHTML=`<div class="app-shell lesson-screen"><section class="lesson-card"><div class="result-box"><div class="result-stars">${"⭐".repeat(Math.max(1,g.score))}</div><div class="result-character" style="font-family:inherit;font-size:75px">🎉</div><h2>复习挑战完成！</h2><p>5 道题答对了 <b>${g.score}</b> 道<br>${g.score>=4?"记得真牢，太棒啦！":"明天再来玩一次，会记得更牢哦。"}</p><div class="hero-actions" style="justify-content:center;margin-top:14px"><button class="secondary-btn" data-nav="home">回到小岛</button><button class="primary-btn orange" data-again>再玩一次</button></div></div></section></div>`;
   bindCommon();$("[data-again]").addEventListener("click",()=>startGame(g.type));
 }
-
 function renderGamePlay(){
   const g=view.game;const pool=WORDS.filter(w=>state.learned[w.id]);
   const word=(pool.length?pool:WORDS)[g.round%(pool.length||WORDS.length)];
@@ -1031,7 +1274,7 @@ function renderStory(){
   const pages=buildStory();
   if(!pages){showToast("先认识至少 3 个字再读绘本哦");nav("home");return}
   const idx=Math.min(state.story.read||0,pages.length-1);
-  app.innerHTML=`<div class="app-shell"><header class="topbar"><div class="brand"><span class="brand-mark">🌱</span><span>字芽岛<small>V2 · 互动版</small></span></div><div class="top-actions"><button class="icon-btn" data-nav="home" aria-label="返回">←</button></div></header><div class="story-book paper" style="display:block"><div class="story-page"><div class="story-art">${sceneBgSvg(pages[idx].art)}</div><div class="story-text" id="storyText">${pages[idx].text}</div></div><div class="story-pager"><button class="secondary-btn" id="storyPrev">← 上一页</button><div class="page-dots">${pages.map((_,i)=>`<i class="${i===idx?"on":""}"></i>`).join("")}</div><button class="secondary-btn" id="storyNext">下一页 →</button></div></div></div>`;
+  app.innerHTML=`<div class="app-shell"><header class="topbar"><div class="brand"><span class="brand-mark">🌱</span><span>字芽岛<small>互动趣味汉字</small></span></div><div class="top-actions"><button class="icon-btn" data-nav="home" aria-label="返回">←</button></div></header><div class="story-book paper" style="display:block"><div class="story-page"><div class="story-art">${sceneBgSvg(pages[idx].art)}</div><div class="story-text" id="storyText">${pages[idx].text}</div></div><div class="story-pager"><button class="secondary-btn" id="storyPrev">← 上一页</button><div class="page-dots">${pages.map((_,i)=>`<i class="${i===idx?"on":""}"></i>`).join("")}</div><button class="secondary-btn" id="storyNext">下一页 →</button></div></div></div>`;
   let cur=idx;
   const go=p=>{cur=Math.max(0,Math.min(pages.length-1,p));state.story.read=cur;saveState();render()};
   $("#storyPrev").addEventListener("click",()=>go(cur-1));
@@ -1071,8 +1314,8 @@ function renderSettings(){
   $("#importData").addEventListener("change",importData);
   $("#resetData").addEventListener("click",resetData);
 }
-function exportData(){const payload={app:"字芽岛 V2",version:2,exportedAt:new Date().toISOString(),state};const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`字芽岛V2-${todayString()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),500);showToast("备份文件已导出")}
-function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const p=JSON.parse(reader.result);if(!p.state||p.version!==2)throw new Error();state={...cloneDefault(),...p.state,settings:{...DEFAULT_STATE.settings,...(p.state.settings||{})},pet:{...DEFAULT_STATE.pet,...(p.state.pet||{})},calendar:{...DEFAULT_STATE.calendar,...(p.state.calendar||{})},story:{...DEFAULT_STATE.story,...(p.story||{})}};saveState();showToast("学习进度已恢复");setTimeout(()=>nav("home"),700)}catch(err){showToast("这个备份文件无法读取")}};reader.readAsText(file)}
+function exportData(){const payload={app:"字芽岛",version:3,exportedAt:new Date().toISOString(),state};const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`字芽岛-${todayString()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),500);showToast("备份文件已导出")}
+function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const p=JSON.parse(reader.result);if(!p.state||p.version!==3)throw new Error();state={...cloneDefault(),...p.state,settings:{...DEFAULT_STATE.settings,...(p.state.settings||{})},pet:{...DEFAULT_STATE.pet,...(p.state.pet||{})},calendar:{...DEFAULT_STATE.calendar,...(p.state.calendar||{})},story:{...DEFAULT_STATE.story,...(p.story||{})}};saveState();showToast("学习进度已恢复");setTimeout(()=>nav("home"),700)}catch(err){showToast("这个备份文件无法读取")}};reader.readAsText(file)}
 function resetData(){if(confirm("确定要清空全部学习进度吗？")){state=cloneDefault();saveState();showToast("已经重新开始");setTimeout(()=>nav("home"),500)}}
 
 function bindCommon(){$$('[data-nav]').forEach(btn=>btn.addEventListener('click',()=>nav(btn.dataset.nav)));$$('[data-start]').forEach(btn=>btn.addEventListener('click',()=>startLesson(btn.dataset.start)))}
@@ -1093,9 +1336,32 @@ function render(){
   else renderHome();
 }
 
+async function bootstrap(){
+  // load strokes manifest
+  try{
+    const res=await fetch("assets/strokes-manifest.json",{cache:"force-cache"});
+    if(res.ok){
+      const data=await res.json();
+      // replace the placeholder by reassignment-safe approach
+      window.__STROKES=Object.freeze(data);
+      // point the const reference (cannot reassign const; instead patch via getter)
+      Object.defineProperty(window,"STROKES_MANIFEST_VALUE",{value:data,writable:false});
+    }
+  }catch(e){console.warn("manifest load failed",e)}
+}
 window.addEventListener("beforeunload",saveState);
 document.addEventListener("visibilitychange",()=>{if(document.hidden)saveState()});
-window.addEventListener("load",()=>{
+window.addEventListener("load",async ()=>{
+  // install manifest mapping
+  try{
+    const res=await fetch("assets/strokes-manifest.json",{cache:"force-cache"});
+    if(res.ok){
+      const data=await res.json();
+      const script=document.createElement("script");
+      script.textContent="const STROKES_MANIFEST="+JSON.stringify(data)+";";
+      document.head.appendChild(script);
+    }
+  }catch(e){}
   if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("./sw.js").catch(()=>{});
   render();
 });
