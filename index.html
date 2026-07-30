@@ -661,7 +661,9 @@ function lessonStepMarkup(word,step){
     return `<div class="step-kicker">第一步 · 看一看</div><h1 class="step-title">点一点画面，认识“${word.char}”</h1><p class="step-hint">点击图中的亮点，看看它们在做什么。</p>
     <div class="scene-wrap" id="sceneWrap">${svg}${items.map((it,i)=>{
       const emoji=itemEmoji(it.k);
-      return `<button class="hit" data-hit="${i}" style="left:${it.x/it.x*100}%;top:${it.y/it.x*100}%;width:14%;height:14%"><span style="position:absolute;inset:0;display:grid;place-items:center;font-size:34px;animation:floatUp 2s ease-in-out infinite alternate">${emoji}</span></button>`;
+      const baseX=Math.min(86,Math.max(6,it.x-7));
+      const baseY=Math.min(72,Math.max(6,it.y-7));
+      return `<button class="hit" data-hit="${i}" style="left:${baseX}%;top:${baseY}%;width:14%;height:14%"><span style="position:absolute;inset:0;display:grid;place-items:center;font-size:34px;animation:floatUp 2s ease-in-out infinite alternate">${emoji}</span></button>`;
     }).join("")}</div>
     <div class="word-panel"><div><div class="big-char">${word.char}</div><div class="pinyin">${word.pinyin}</div><div class="word-meaning">${word.meaning}</div></div><div style="text-align:right"><button class="speak-btn" id="speakWord">🔊 听一听</button></div></div>`;
   }
@@ -699,9 +701,10 @@ function wordBuild(word){
 function bindLessonStep(word,step){
   if(step===0){
     const speakIt=()=>{const b=$("#speakWord");b?.classList.add("speaking");speak(word.voiceWord,()=>b?.classList.remove("speaking"))};
+    const items=artScene(word.scene).items;
     $("#sceneWrap").addEventListener("click",e=>{
       const btn=e.target.closest("[data-hit]");if(!btn)return;
-      const idx=+btn.dataset.hit;const items=artScene(word.scene).items;const it=items[idx];
+      const idx=+btn.dataset.hit;const it=items[idx];
       const pop=document.createElement("div");pop.className="hit-pop";pop.textContent=itemEmoji(it.k);pop.style.left=btn.style.left;pop.style.top=btn.style.top;$("#sceneWrap").appendChild(pop);setTimeout(()=>pop.remove(),950);
       view.score=Math.min(5,view.score+1);playTone("ok");
     });
