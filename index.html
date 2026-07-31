@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
+<script src="assets/strokes-manifest.js"></script>
+<head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
 <meta name="theme-color" content="#fff4d6" />
@@ -402,7 +404,7 @@ const WORLDS = [
 
 const DAILY_PLAN = ["sun","moon","mountain","water","fire"];
 
-const STROKES_MANIFEST = /*#RUNTIME*/ null;
+const STROKES_MANIFEST = window.STROKES_MANIFEST || {};
 
 /* =========================================================
    State + storage
@@ -1352,16 +1354,6 @@ async function bootstrap(){
 window.addEventListener("beforeunload",saveState);
 document.addEventListener("visibilitychange",()=>{if(document.hidden)saveState()});
 window.addEventListener("load",async ()=>{
-  // install manifest mapping
-  try{
-    const res=await fetch("assets/strokes-manifest.json",{cache:"force-cache"});
-    if(res.ok){
-      const data=await res.json();
-      const script=document.createElement("script");
-      script.textContent="const STROKES_MANIFEST="+JSON.stringify(data)+";";
-      document.head.appendChild(script);
-    }
-  }catch(e){}
   if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("./sw.js").catch(()=>{});
   render();
 });
